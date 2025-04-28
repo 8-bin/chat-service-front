@@ -10,6 +10,7 @@ function ChattingPage() {
   const [input, setInput] = useState('');
   const [roomName, setRoomName] = useState('');
   const stompClientRef = useRef(null);
+  const chatBoxRef = useRef(null); // ✅ 추가: 채팅창 ref
 
   const token = localStorage.getItem('token');
   const nickname = localStorage.getItem('nickname') || '익명';
@@ -27,16 +28,21 @@ function ChattingPage() {
     };
   }, []);
 
+  useEffect(() => {
+    // ✅ 추가: messages 업데이트될 때 스크롤 자동 하단 이동
+    if (chatBoxRef.current) {
+      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
+    }
+  }, [messages]);
+
   const connectWebSocket = () => {
     const socket = new SockJS(`http://52.78.250.173:30081/chat?token=${token}`);
-
     const client = new Client({
       webSocketFactory: () => socket,
       connectHeaders: { Authorization: `Bearer ${token}` },
       debug: (str) => console.log('[STOMP DEBUG]', str),
       onConnect: () => {
         console.log('WebSocket 연결 성공');
-
         client.subscribe(`/topic/chat/room/${roomId}`, (message) => {
           try {
             const body = JSON.parse(message.body);
@@ -51,7 +57,7 @@ function ChattingPage() {
           body: JSON.stringify({
             roomId,
             sender: nickname,
-            content: `${nickname} 님이 입장했습니다.`,
+            content: `${nickname}님이 입장했습니다.`,
           }),
         });
       },
@@ -118,7 +124,7 @@ function ChattingPage() {
         body: JSON.stringify({
           roomId,
           sender: nickname,
-          content: `${nickname} 님이 퇴장했습니다.`,
+          content: `${nickname}님이 퇴장했습니다.`,
         }),
       });
     }
@@ -128,9 +134,14 @@ function ChattingPage() {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.roomName}>{roomName}</h2> {/* ✅ 방 이름 */}
+      {/* 상단 헤더 */}
+      <div style={styles.header}>
+        <h2 style={styles.roomName}>{roomName}</h2>
+        <button onClick={handleLeaveRoom} style={styles.leaveButton}>나가기</button>
+      </div>
 
-      <div style={styles.chatBox}>
+      {/* 채팅창 */}
+      <div style={styles.chatBox} ref={chatBoxRef}> {/* ✅ ref 연결 */}
         {messages.map((msg, idx) => {
           const isMine = msg.sender === nickname;
           return (
@@ -156,22 +167,17 @@ function ChattingPage() {
         })}
       </div>
 
+      {/* 입력창 */}
       <div style={styles.inputArea}>
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Type a message..."
+          placeholder="메시지를 입력하세요..."
           style={styles.input}
         />
         <button onClick={handleSendMessage} style={styles.sendButton}>
-          Send
-        </button>
-      </div>
-
-      <div style={{ marginTop: '10px' }}>
-        <button onClick={handleLeaveRoom} style={styles.leaveButton}>
-          Leave Room
+          전송
         </button>
       </div>
     </div>
@@ -182,30 +188,43 @@ const styles = {
   container: {
     width: '600px',
     margin: '30px auto',
-    textAlign: 'center',
     fontFamily: 'Arial, sans-serif',
+    backgroundColor: '#ffffff',
+    borderRadius: '10px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    overflow: 'hidden',
   },
-  title: {
-    fontSize: '32px',
-    fontWeight: 'bold',
-    marginBottom: '10px',
+  header: {
+    padding: '15px 20px',
+    borderBottom: '1px solid #ccc',
+    backgroundColor: '#f7f7f7',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   roomName: {
     fontSize: '20px',
-    marginBottom: '20px',
-    color: '#555',
+    color: '#333',
+    margin: 0,
+    paddingLeft: '10px',
+  },
+  leaveButton: {
+    padding: '6px 14px',
+    fontSize: '14px',
+    backgroundColor: '#dc3545',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '20px',
+    cursor: 'pointer',
   },
   chatBox: {
-    border: '1px solid #ccc',
-    borderRadius: '10px',
-    backgroundColor: '#f9f9f9',
     height: '400px',
     overflowY: 'scroll',
     padding: '15px',
-    marginBottom: '10px',
     display: 'flex',
     flexDirection: 'column',
     gap: '10px',
+    backgroundColor: '#f9f9f9',
   },
   messageContainer: {
     display: 'flex',
@@ -214,7 +233,6 @@ const styles = {
     maxWidth: '70%',
     padding: '10px',
     borderRadius: '20px',
-    backgroundColor: '#f1f0f0',
     wordBreak: 'break-word',
     textAlign: 'left',
   },
@@ -225,29 +243,22 @@ const styles = {
   },
   inputArea: {
     display: 'flex',
-    alignItems: 'center',
+    padding: '15px 20px',
+    borderTop: '1px solid #ccc',
     gap: '10px',
+    backgroundColor: '#fff',
   },
   input: {
     flex: 1,
     padding: '10px',
-    fontSize: '16px',
     borderRadius: '20px',
     border: '1px solid #ccc',
+    fontSize: '16px',
   },
   sendButton: {
     padding: '10px 20px',
     fontSize: '16px',
     backgroundColor: '#007bff',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '20px',
-    cursor: 'pointer',
-  },
-  leaveButton: {
-    padding: '10px 20px',
-    fontSize: '14px',
-    backgroundColor: '#dc3545',
     color: '#fff',
     border: 'none',
     borderRadius: '20px',

@@ -64,7 +64,6 @@ function ChatRoomsPage() {
       await axios.post(`http://52.78.250.173:30081/api/chatrooms/${roomId}/enter`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      alert('채팅방 입장 성공!');
       navigate(`/chatroom/${roomId}`);
     } catch (error) {
       console.error('채팅방 입장 실패', error);
@@ -74,7 +73,7 @@ function ChatRoomsPage() {
 
   return (
     <div style={styles.container}>
-      <h2>채팅방 목록</h2>
+      <h1 style={styles.title}>채팅방 목록</h1>
 
       {/* 채팅방 생성 */}
       <div style={styles.createRoom}>
@@ -85,66 +84,97 @@ function ChatRoomsPage() {
           onChange={(e) => setNewRoomName(e.target.value)}
           style={styles.input}
         />
-        <button onClick={handleCreateRoom} style={styles.button}>
-          방 생성
+        <button onClick={handleCreateRoom} style={styles.createButton}>
+          방 만들기
         </button>
       </div>
 
       {/* 채팅방 리스트 */}
-      <ul style={styles.list}>
+      <div style={styles.roomList}>
         {chatRooms.map((room) => (
-          <li key={room.id} style={styles.listItem}>
-            <span 
-              style={{ cursor: 'pointer' }} 
-              onClick={() => handleEnterRoom(room.id)}  // 입장 로직 연결
+          <div key={room.id} style={styles.roomItem}>
+            <div 
+              style={styles.roomName}
+              onClick={() => handleEnterRoom(room.id)}
             >
               {room.name}
-            </span>
+            </div>
             <button 
               onClick={() => handleDeleteRoom(room.id)} 
               style={styles.deleteButton}
             >
               삭제
             </button>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
 
 const styles = {
   container: {
-    width: '400px',
+    maxWidth: '500px',
     margin: '50px auto',
+    padding: '20px',
+    borderRadius: '12px',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    backgroundColor: '#ffffff',
+  },
+  title: {
     textAlign: 'center',
+    marginBottom: '30px',
+    fontSize: '28px',
+    color: '#333',
   },
   createRoom: {
+    display: 'flex',
     marginBottom: '20px',
   },
   input: {
-    padding: '8px',
-    marginRight: '10px',
-    width: '200px',
+    flex: 1,
+    padding: '10px',
+    fontSize: '16px',
+    border: '1px solid #ccc',
+    borderRadius: '8px',
   },
-  button: {
-    padding: '8px 12px',
+  createButton: {
+    marginLeft: '10px',
+    padding: '10px 16px',
+    fontSize: '16px',
+    backgroundColor: '#28a745',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
   },
-  list: {
-    listStyle: 'none',
-    padding: 0,
+  roomList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
   },
-  listItem: {
-    marginBottom: '10px',
+  roomItem: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    padding: '12px',
+    border: '1px solid #ddd',
+    borderRadius: '8px',
+    backgroundColor: '#f9f9f9',
+    cursor: 'pointer',
+  },
+  roomName: {
+    fontSize: '18px',
+    fontWeight: '500',
+    color: '#007bff',
   },
   deleteButton: {
-    padding: '5px 10px',
+    padding: '6px 10px',
+    fontSize: '14px',
     backgroundColor: '#dc3545',
     color: '#fff',
     border: 'none',
+    borderRadius: '6px',
     cursor: 'pointer',
   },
 };

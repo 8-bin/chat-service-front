@@ -30,22 +30,22 @@ function RegisterPage() {
     <div style={{ textAlign: 'center', marginTop: '100px' }}>
       <h1>회원가입</h1>
       <form onSubmit={handleRegister}>
-        <div>
+      <div>
           <input
-            type="email"
-            placeholder="이메일"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            placeholder="이름"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
             style={{ padding: '8px', marginBottom: '10px' }}
             required
           />
         </div>
         <div>
           <input
-            type="text"
-            placeholder="닉네임"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
+            type="email"
+            placeholder="이메일"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             style={{ padding: '8px', marginBottom: '10px' }}
             required
           />
